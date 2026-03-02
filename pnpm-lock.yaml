@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      hono:
+        specifier: ^4.12.3
+        version: 4.12.3
     devDependencies:
       '@biomejs/biome':
         specifier: 2.4.5
@@ -19,6 +23,31 @@ importers:
         version: 5.9.3
 
   packages/backend:
+    dependencies:
+      '@neondatabase/serverless':
+        specifier: ^1.0.2
+        version: 1.0.2
+      drizzle-orm:
+        specifier: ^0.45.1
+        version: 0.45.1(@neondatabase/serverless@1.0.2)(@types/pg@8.18.0)
+      hono:
+        specifier: ^4.12.3
+        version: 4.12.3
+    devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: ^0.12.4
+        version: 0.12.18(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@25.3.3))
+      drizzle-kit:
+        specifier: ^0.31.9
+        version: 0.31.9
+      vitest:
+        specifier: ~3.2.0
+        version: 3.2.4(@types/node@25.3.3)
+      wrangler:
+        specifier: ^4.69.0
+        version: 4.69.0
+
+  packages/worker:
     dependencies:
       '@neondatabase/serverless':
         specifier: ^1.0.2
