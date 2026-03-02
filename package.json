@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "typecheck": "tsc -b -p tsconfig.typecheck.json --noEmit"
+    "typecheck": "tsc -b -p tsconfig.typecheck.json --noEmit",
+    "lint:check": "pnpx @biomejs/biome lint",
+    "lint:write": "pnpx @biomejs/biome lint --write",
+    "format:write": "pnpx @biomejs/biome format ./packages"
   },
   "keywords": [],
   "author": "Jonny Gamba",
   "license": "MIT",
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
+    "@biomejs/biome": "2.4.5",
     "@types/node": "^25.3.3",
     "typescript": "^5.9.3"
   }
