@@ -5,4 +5,10 @@ export const CreateTaskSchema = v.strictObject({
 	status: v.optional(v.picklist(["todo", "done"]), "todo"),
 });
 
+export const TaskIdParamsSchema = v.strictObject({
+	id: v.pipe(v.string(), v.trim()),
+});
+
 export type CreateTask = v.InferOutput<typeof CreateTaskSchema>;
+
+export type TaskIdParams = v.InferOutput<typeof TaskIdParamsSchema>;

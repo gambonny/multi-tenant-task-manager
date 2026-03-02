@@ -5,9 +5,14 @@ import { dbMiddleware } from "@/middleware/db";
 import { authMiddleware } from "@/middleware/auth";
 import { rateLimit } from "@/middleware/rate-limiting";
 import { validator } from "hono/validator";
-import { CreateTaskSchema, type CreateTask } from "@/schemas";
+import {
+	CreateTaskSchema,
+	TaskIdParamsSchema,
+	type CreateTask,
+	type TaskIdParams,
+} from "@/schemas";
 import { tasks } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 const app = new Hono<AppEnv>();
 
@@ -77,5 +82,39 @@ app.get("/tasks", async (c) => {
 		return c.json({ error: "Internal server error" }, 500);
 	}
 });
+
+app.delete(
+	"/tasks/:id",
+	validator("param", (params, c) => {
+		const { output, success, issues } = v.safeParse(TaskIdParamsSchema, params);
+
+		if (!success) {
+			return c.json({ message: "Invalid request params", issues }, 400);
+		}
+
+		return output;
+	}),
+	async (c) => {
+		const db = c.get("db");
+		const { tenantId } = c.get("auth");
+		const { id } = c.req.valid("param") as TaskIdParams;
+
+		try {
+			const deleted = await db
+				.delete(tasks)
+				.where(and(eq(tasks.id, id), eq(tasks.tenantId, tenantId)))
+				.returning({ id: tasks.id });
+
+			if (deleted.length === 0) {
+				return c.json({ error: "Not found" }, 404);
+			}
+
+			return new Response(null, { status: 204 });
+		} catch (err) {
+			console.error("DELETE /tasks/:id failed", { tenantId, id, error: err });
+			return c.json({ error: "Internal server error" }, 500);
+		}
+	},
+);
 
 export default app;
