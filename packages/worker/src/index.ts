@@ -29,13 +29,9 @@ app.get("/health", (c) => {
 app.post(
 	"/tasks",
 	rateLimit({ limit: 10, windowMs: 60_000 }),
-	validator("json", async (body, c) => {
+	validator("json", (body, c) => {
 		const { output, success, issues } = v.safeParse(CreateTaskSchema, body);
-
-		if (!success) {
-			return c.json({ message: "Invalid request body", issues }, 400);
-		}
-
+		if (!success) return c.json({ error: "Invalid request body", issues }, 400);
 		return output;
 	}),
 	async (c): Promise<Response> => {
@@ -43,21 +39,24 @@ app.post(
 		const { tenantId, userId } = c.get("auth");
 		const { title, status } = c.req.valid("json") as CreateTask;
 
-		const inserted = await db
-			.insert(tasks)
-			.values({ title, status, tenantId })
-			.returning();
+		try {
+			const inserted = await db
+				.insert(tasks)
+				.values({ title, status, tenantId })
+				.returning();
 
-		const created = inserted[0];
+			const created = inserted[0];
 
-		if (!created) {
-			return new Response(JSON.stringify({ error: "Internal error" }), {
-				status: 500,
-				headers: { "content-type": "application/json" },
-			});
+			if (!created) {
+				console.error("POST /tasks returned no row", { tenantId, userId });
+				return c.json({ error: "Internal server error" }, 500);
+			}
+
+			return c.json({ data: created }, 201);
+		} catch (err) {
+			console.error("POST /tasks failed", { tenantId, userId, error: err });
+			return c.json({ error: "Internal server error" }, 500);
 		}
-
-		return c.json({ data: created }, 201);
 	},
 );
 
@@ -89,7 +88,7 @@ app.delete(
 		const { output, success, issues } = v.safeParse(TaskIdParamsSchema, params);
 
 		if (!success) {
-			return c.json({ message: "Invalid request params", issues }, 400);
+			return c.json({ error: "Invalid request params", issues }, 400);
 		}
 
 		return output;
