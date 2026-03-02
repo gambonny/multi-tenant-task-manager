@@ -1,0 +1,9 @@
+packages:
+  - packages/**
+
+catalog:
+  '@gambonny/valext': 1.0.0
+  valibot: 1.2.0
+
+onlyBuiltDependencies:
+  - esbuild
