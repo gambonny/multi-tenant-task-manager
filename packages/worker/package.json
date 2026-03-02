@@ -17,8 +17,10 @@
     "wrangler": "^4.69.0"
   },
   "dependencies": {
+    "@gambonny/valext": "catalog:",
     "@neondatabase/serverless": "^1.0.2",
     "drizzle-orm": "^0.45.1",
-    "hono": "^4.12.3"
+    "hono": "^4.12.3",
+    "valibot": "catalog:"
   }
 }

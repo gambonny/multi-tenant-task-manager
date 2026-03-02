@@ -4,6 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@gambonny/valext':
+      specifier: 1.0.0
+      version: 1.0.0
+    valibot:
+      specifier: 1.2.0
+      version: 1.2.0
+
 importers:
 
   .:
@@ -49,6 +58,9 @@ importers:
 
   packages/worker:
     dependencies:
+      '@gambonny/valext':
+        specifier: 'catalog:'
+        version: 1.0.0(valibot@1.2.0(typescript@5.9.3))
       '@neondatabase/serverless':
         specifier: ^1.0.2
         version: 1.0.2
@@ -58,6 +70,9 @@ importers:
       hono:
         specifier: ^4.12.3
         version: 4.12.3
+      valibot:
+        specifier: 'catalog:'
+        version: 1.2.0(typescript@5.9.3)
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.12.4
@@ -638,6 +653,11 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@gambonny/valext@1.0.0':
+    resolution: {integrity: sha512-Ti3I6rdz27RyPqul53oIaykMQ7La2TOz878TK/lJRaA3EWj46TOhG4+QAF4uWxzBOWzx79zSvUY/hihfXOcABA==}
+    peerDependencies:
+      valibot: ^1.2.0
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -1335,6 +1355,14 @@ packages:
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
 
+  valibot@1.2.0:
+    resolution: {integrity: sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   vite-node@3.2.4:
     resolution: {integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
@@ -1766,6 +1794,10 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.3':
     optional: true
+
+  '@gambonny/valext@1.0.0(valibot@1.2.0(typescript@5.9.3))':
+    dependencies:
+      valibot: 1.2.0(typescript@5.9.3)
 
   '@img/colour@1.1.0': {}
 
@@ -2370,6 +2402,10 @@ snapshots:
   unenv@2.0.0-rc.24:
     dependencies:
       pathe: 2.0.3
+
+  valibot@1.2.0(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
 
   vite-node@3.2.4(@types/node@25.3.3):
     dependencies:

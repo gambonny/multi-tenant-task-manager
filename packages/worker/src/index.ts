@@ -1,21 +1,18 @@
 import { Hono } from "hono";
+import type { AppEnv } from "@/env";
 import { dbMiddleware } from "@/middleware/db";
-import type { makeDbConnection } from "./db/client";
+import { authMiddleware } from "@/middleware/auth";
 
-type Variables = {
-	db: ReturnType<typeof makeDbConnection>;
-};
+const app = new Hono<AppEnv>();
 
-const app = new Hono<{ Bindings: Env; Variables: Variables }>();
-
+app.use("*", authMiddleware);
 app.use("*", dbMiddleware);
 
 app.get("/health", (c) => {
 	const db = c.get("db");
+	const auth = c.get("auth");
 
-	return c.json({
-		ok: true,
-	});
+	return c.json({ ok: true, tenantId: auth.tenantId, userId: auth.userId });
 });
 
 export default app;
