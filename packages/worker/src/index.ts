@@ -7,6 +7,7 @@ import { rateLimit } from "@/middleware/rate-limiting";
 import { validator } from "hono/validator";
 import { CreateTaskSchema, type CreateTask } from "@/schemas";
 import { tasks } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 
 const app = new Hono<AppEnv>();
 
@@ -54,5 +55,27 @@ app.post(
 		return c.json({ data: created }, 201);
 	},
 );
+
+app.get("/tasks", async (c) => {
+	const db = c.get("db");
+	const { tenantId } = c.get("auth");
+
+	try {
+		const rows = await db
+			.select()
+			.from(tasks)
+			.where(eq(tasks.tenantId, tenantId))
+			.orderBy(desc(tasks.createdAt));
+
+		return c.json({ data: rows }, 200);
+	} catch (err) {
+		console.error("GET /tasks failed", {
+			tenantId,
+			error: err,
+		});
+
+		return c.json({ error: "Internal server error" }, 500);
+	}
+});
 
 export default app;
