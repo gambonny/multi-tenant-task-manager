@@ -11,4 +11,4 @@ export const TaskSchema = v.object({
 	createdAt: v.string(),
 });
 
-export const TasksListSchema = v.array(TaskSchema);
+export const TasksListSchema = v.strictObject({ data: v.array(TaskSchema) });

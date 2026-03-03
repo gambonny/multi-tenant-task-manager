@@ -1,14 +1,20 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	notFound,
+	type ErrorComponentProps,
+} from "@tanstack/react-router";
 import { ButtonLink } from "@/components/ButtonLink";
-import type { Tenant } from "@/types";
 import { NewTaskForm } from "@/components/NewTaskForm";
+import { TaskList } from "@/components/TaskList";
+import { ApiError } from "@/api/client";
+import { tasksListOptions } from "@/queries/tasks";
+import type { Tenant } from "@/types";
+import React from "react";
 
 function resolveTenant(tenantIdRaw: string): Tenant {
 	if (tenantIdRaw === "A") {
 		const token = import.meta.env.VITE_TENANT_A_TOKEN as string | undefined;
-		if (!token) {
-			throw new Error("Missing env var: VITE_TENANT_A_TOKEN");
-		}
+		if (!token) throw new Error("Missing env var: VITE_TENANT_A_TOKEN");
 
 		return {
 			id: "A",
@@ -20,9 +26,7 @@ function resolveTenant(tenantIdRaw: string): Tenant {
 
 	if (tenantIdRaw === "B") {
 		const token = import.meta.env.VITE_TENANT_B_TOKEN as string | undefined;
-		if (!token) {
-			throw new Error("Missing env var: VITE_TENANT_B_TOKEN");
-		}
+		if (!token) throw new Error("Missing env var: VITE_TENANT_B_TOKEN");
 
 		return {
 			id: "B",
@@ -41,10 +45,17 @@ function resolveTenant(tenantIdRaw: string): Tenant {
 }
 
 export const Route = createFileRoute("/tenants/$tenantId")({
-	loader: ({ params }) => {
+	head: () => ({
+		meta: [{ title: "Tenant tasks list" }],
+	}),
+	loader: async ({ params, context }) => {
 		const tenant = resolveTenant(params.tenantId);
+		await context.queryClient.prefetchQuery(tasksListOptions(tenant));
 		return { tenant };
 	},
+
+	pendingComponent: () => <p>Loading...</p>,
+	errorComponent: (props) => <TenantError {...props} />,
 	notFoundComponent: () => <TenantNotFound />,
 	component: TenantRoute,
 });
@@ -69,7 +80,50 @@ function TenantRoute() {
 				</header>
 
 				<NewTaskForm tenant={tenant} />
+
+				<React.Suspense fallback={<TasksPending />}>
+					<TaskList tenant={tenant} />
+				</React.Suspense>
 			</main>
+		</div>
+	);
+}
+
+function TasksPending() {
+	return (
+		<section className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+			<h2 className="text-sm font-semibold text-slate-900">Tasks</h2>
+			<p className="mt-2 text-sm text-slate-600">Loading…</p>
+		</section>
+	);
+}
+
+function TenantError({ error }: ErrorComponentProps) {
+	const message =
+		error instanceof ApiError
+			? error.status === 401
+				? "Unauthorized. Check the tenant token."
+				: error.status === 429
+					? "Too many requests. Try again in a moment."
+					: error.message || "Request failed."
+			: error instanceof Error
+				? error.message
+				: "Something went wrong.";
+
+	return (
+		<div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+			<div className="w-full max-w-md rounded-xl bg-white shadow-sm border border-slate-200 p-8 text-center">
+				<h1 className="text-xl font-semibold text-slate-900">
+					Something went wrong
+				</h1>
+				<p role="alert" className="mt-2 text-sm text-red-600">
+					{message}
+				</p>
+
+				<div className="mt-6">
+					<ButtonLink to="/">Back to tenant selection</ButtonLink>
+				</div>
+			</div>
 		</div>
 	);
 }

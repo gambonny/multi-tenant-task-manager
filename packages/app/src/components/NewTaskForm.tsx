@@ -86,7 +86,7 @@ export function NewTaskForm({ tenant }: { tenant: Tenant }) {
 							"transition-all duration-150",
 							"hover:bg-slate-700",
 							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2",
-							"active:scale-95 active:translate-y-[1px]",
+							"enabled:active:scale-95 enabled:active:translate-y-[1px]",
 							"disabled:opacity-50 disabled:cursor-not-allowed",
 						].join(" ")}
 					>

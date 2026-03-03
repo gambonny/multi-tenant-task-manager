@@ -1,8 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	queryOptions,
+	useMutation,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query";
 import { extract } from "@gambonny/valext";
 import { apiFetch } from "@/api/client";
 import type { TenantAuth } from "@/api/client";
-
 import { TaskSchema, TasksListSchema } from "@/schemas";
 
 export const tasksKeys = {
@@ -10,14 +14,25 @@ export const tasksKeys = {
 	list: (tenantId: TenantAuth["id"]) => ["tasks", tenantId] as const,
 };
 
-export function useTasksQuery(tenant: TenantAuth) {
-	return useQuery({
+export function tasksListOptions(tenant: TenantAuth) {
+	return queryOptions({
 		queryKey: tasksKeys.list(tenant.id),
 		queryFn: async () => {
 			const data = await apiFetch<unknown>("/tasks", { tenant });
-			return extract(TasksListSchema).from(data);
+			const { output, success, issues } = extract(TasksListSchema).from(data);
+
+			if (!success) {
+				console.error(issues);
+				throw new Error("Failed during parsing");
+			}
+
+			return output.data;
 		},
 	});
+}
+
+export function useTasksSuspenseQuery(tenant: TenantAuth) {
+	return useSuspenseQuery(tasksListOptions(tenant));
 }
 
 export function useCreateTaskMutation(tenant: TenantAuth) {
