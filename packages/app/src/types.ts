@@ -1,3 +1,6 @@
+import type { TaskSchema, TasksListSchema, TaskStatusSchema } from "@/schemas";
+import type * as v from "valibot";
+
 export type Tenant =
 	| {
 			id: "A";
@@ -11,3 +14,7 @@ export type Tenant =
 			userId: "user_two";
 			token: string;
 	  };
+
+export type Task = v.InferOutput<typeof TaskSchema>;
+export type TasksList = v.InferOutput<typeof TasksListSchema>;
+export type TaskStatus = v.InferOutput<typeof TaskStatusSchema>;

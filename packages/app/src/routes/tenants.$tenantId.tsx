@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ButtonLink } from "@/components/ButtonLink";
 import type { Tenant } from "@/types";
+import { NewTaskForm } from "@/components/NewTaskForm";
 
 function resolveTenant(tenantIdRaw: string): Tenant {
 	if (tenantIdRaw === "A") {
@@ -67,11 +68,7 @@ function TenantRoute() {
 					<ButtonLink to="/">Change tenant</ButtonLink>
 				</header>
 
-				<div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-					<p className="text-sm text-slate-700">
-						Next: tasks list + inline create form + delete actions.
-					</p>
-				</div>
+				<NewTaskForm tenant={tenant} />
 			</main>
 		</div>
 	);
