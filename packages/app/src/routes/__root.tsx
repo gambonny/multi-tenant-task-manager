@@ -1,9 +1,15 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import {
+	createRootRoute,
+	HeadContent,
+	Outlet,
+	Scripts,
+} from "@tanstack/react-router";
 
 const RootLayout = () => (
 	<>
-		<hr />
+		<HeadContent />
 		<Outlet />
+		<Scripts />
 	</>
 );
 

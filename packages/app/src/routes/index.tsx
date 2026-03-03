@@ -1,9 +1,31 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import { ButtonLink } from "@/components/ButtonLink";
 
-export const Route = createFileRoute('/')({
-  component: RouteComponent,
-})
+export const Route = createFileRoute("/")({
+	component: RouteComponent,
+	head: () => ({
+		meta: [{ title: "Home" }],
+	}),
+});
 
 function RouteComponent() {
-  return <div>Hello "/"!</div>
+	return (
+		<main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+			<div className="w-full max-w-md rounded-xl bg-white shadow-sm border border-slate-200 p-8">
+				<h1 className="text-xl font-semibold text-slate-900 text-center">
+					Select a Tenant
+				</h1>
+
+				<div className="mt-6 flex flex-col gap-4">
+					<ButtonLink to="/tenants/A" className="w-full">
+						Tenant A
+					</ButtonLink>
+
+					<ButtonLink to="/tenants/B" className="w-full">
+						Tenant B
+					</ButtonLink>
+				</div>
+			</div>
+		</main>
+	);
 }
