@@ -56,17 +56,19 @@ app.post(
 		return output;
 	}),
 	async (c): Promise<Response> => {
-		const log = c.var.getLogger({ route: "tasks.create.handler" });
-
 		const db = c.get("db");
-		const { tenantId, userId } = c.get("auth");
 		const { title, status } = c.req.valid("json") as CreateTask;
+		const { tenantId, userId } = c.get("auth");
+
+		const log = c.var.getLogger({
+			route: "tasks.create.handler",
+			tenantId,
+			userId,
+		});
 
 		log.info("Saving started", {
 			event: "tasks:create:started",
 			scope: "handler:init",
-			tenantId,
-			userId,
 		});
 
 		try {
@@ -81,8 +83,6 @@ app.post(
 				log.error("Task not inserted", {
 					event: "tasks:create:db:no-row",
 					scope: "db:insert",
-					tenantId,
-					userId,
 				});
 
 				return c.json({ error: "Internal server error" }, 500);
@@ -91,8 +91,6 @@ app.post(
 			log.info("Creation succeeded", {
 				event: "tasks:create:success",
 				scope: "db:insert",
-				tenantId,
-				userId,
 				taskId: created.id,
 			});
 
@@ -101,8 +99,6 @@ app.post(
 			log.error("Creation failed", {
 				event: "tasks:create:failed",
 				scope: "db:insert",
-				tenantId,
-				userId,
 				error: err instanceof Error ? err.message : String(err),
 			});
 
@@ -112,16 +108,18 @@ app.post(
 );
 
 app.get("/tasks", async (c) => {
-	const log = c.var.getLogger({ route: "tasks.list.handler" });
-
 	const db = c.get("db");
 	const { tenantId, userId } = c.get("auth");
+
+	const log = c.var.getLogger({
+		route: "tasks.list.handler",
+		tenantId,
+		userId,
+	});
 
 	log.info("Preparing retrieval", {
 		event: "tasks:list:started",
 		scope: "handler:init",
-		tenantId,
-		userId,
 	});
 
 	try {
@@ -134,8 +132,6 @@ app.get("/tasks", async (c) => {
 		log.info("Listing succeeded", {
 			event: "tasks:list:success",
 			scope: "db:select",
-			tenantId,
-			userId,
 			count: rows.length,
 		});
 
@@ -144,8 +140,6 @@ app.get("/tasks", async (c) => {
 		log.error("Listing failed", {
 			event: "tasks:list:failed",
 			scope: "db:select",
-			tenantId,
-			userId,
 			error: err instanceof Error ? err.message : String(err),
 		});
 
@@ -173,18 +167,20 @@ app.delete(
 		return output;
 	}),
 	async (c) => {
-		const log = c.var.getLogger({ route: "tasks.delete.handler" });
-
 		const db = c.get("db");
-		const { tenantId, userId } = c.get("auth");
 		const { id } = c.req.valid("param") as TaskIdParams;
+		const { tenantId, userId } = c.get("auth");
+
+		const log = c.var.getLogger({
+			route: "tasks.delete.handler",
+			tenantId,
+			userId,
+			taskId: id,
+		});
 
 		log.info("Preparing deletion", {
 			event: "tasks:delete:started",
 			scope: "handler:init",
-			tenantId,
-			userId,
-			taskId: id,
 		});
 
 		try {
@@ -197,9 +193,6 @@ app.delete(
 				log.warn("Task Not found", {
 					event: "tasks:delete:not-found",
 					scope: "db:delete",
-					tenantId,
-					userId,
-					taskId: id,
 				});
 
 				return c.json({ error: "Not found" }, 404);
@@ -208,9 +201,6 @@ app.delete(
 			log.info("Deletion succeeded", {
 				event: "tasks:delete:success",
 				scope: "db:delete",
-				tenantId,
-				userId,
-				taskId: id,
 			});
 
 			return new Response(null, { status: 204 });
@@ -218,9 +208,6 @@ app.delete(
 			log.error("Deletion failed", {
 				event: "tasks:delete:failed",
 				scope: "db:delete",
-				tenantId,
-				userId,
-				taskId: id,
 				error: err instanceof Error ? err.message : String(err),
 			});
 
@@ -228,5 +215,34 @@ app.delete(
 		}
 	},
 );
+
+app.notFound((c) => {
+	const log = c.var.getLogger({ route: "system.not-found" });
+	const auth = c.get("auth");
+
+	log.warn("Route not found", {
+		event: "http:404",
+		scope: "http:not-found",
+		tenantId: auth.tenantId,
+		userId: auth.userId,
+	});
+
+	return c.json({ error: "Not found" }, 404);
+});
+
+app.onError((err, c) => {
+	const log = c.var.getLogger({ route: "system.on-error" });
+	const auth = c.get("auth");
+
+	log.error("Unhandled error", {
+		event: "http:500",
+		scope: "http:on-error",
+		tenantId: auth.tenantId,
+		userId: auth.userId,
+		error: err instanceof Error ? err.message : String(err),
+	});
+
+	return c.json({ error: "Internal server error" }, 500);
+});
 
 export default app;
