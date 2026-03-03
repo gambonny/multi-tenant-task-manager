@@ -82,6 +82,7 @@ If your frontend runs on a different origin, add it there.
 ## Run Worker
 
 ```bash
+pnpm -C packages/worker db:migrate
 pnpm -C packages/worker dev
 ```
 

@@ -1,27 +1,27 @@
 {
-	"name": "@worker",
-	"version": "0.0.0",
-	"private": true,
-	"sideEffects": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
-		"test": "vitest",
-		"cf-typegen": "wrangler types"
-	},
-	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.12.4",
-		"drizzle-kit": "^0.31.9",
-		"vitest": "~3.2.0",
-		"wrangler": "^4.69.0"
-	},
-	"dependencies": {
-		"@gambonny/cflo": "^0.0.14",
-		"@gambonny/valext": "catalog:",
-		"@neondatabase/serverless": "^1.0.2",
-		"drizzle-orm": "^0.45.1",
-		"hono": "^4.12.3",
-		"valibot": "catalog:"
-	}
+  "name": "@worker",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.12.4",
+    "drizzle-kit": "^0.31.9",
+    "vitest": "~3.2.0",
+    "wrangler": "^4.69.0"
+  },
+  "dependencies": {
+    "@gambonny/cflo": "^0.0.14",
+    "@gambonny/valext": "catalog:",
+    "@neondatabase/serverless": "^1.0.2",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.3",
+    "valibot": "catalog:"
+  }
 }
