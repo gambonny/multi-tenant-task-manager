@@ -139,8 +139,11 @@ http://localhost:5173
 * TailwindCSS
 * Biome
 
-Personal packages:
+## Additional Utilities
 
-* [https://github.com/gambonny/cflo](https://github.com/gambonny/cflo)
-* [https://github.com/gambonny/valext](https://github.com/gambonny/valext)
+The project uses two small utility packages I maintain:
 
+- `cflo` – lightweight logger for Cloudflare environments
+- `valext` – small extensions around Valibot for schema ergonomics
+
+These are thin utilities and not required for understanding the core challenge implementation.
