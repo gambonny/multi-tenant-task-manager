@@ -43,7 +43,7 @@ app.post(
 	"/tasks",
 	rateLimit({ limit: 10, windowMs: 60_000 }),
 	validator("json", (body, c) => {
-		const log = c.var.getLogger({ route: "tasks.create.validator" });
+		const log = c.var["getLogger"]({ route: "tasks.create.validator" });
 
 		const { output, success, issues } = v.safeParse(CreateTaskSchema, body);
 
@@ -154,7 +154,7 @@ app.get("/tasks", async (c) => {
 app.delete(
 	"/tasks/:id",
 	validator("param", (params, c) => {
-		const log = c.var.getLogger({ route: "tasks.delete.validator" });
+		const log = c.var["getLogger"]({ route: "tasks.delete.validator" });
 
 		const { output, success, issues } = v.safeParse(TaskIdParamsSchema, params);
 

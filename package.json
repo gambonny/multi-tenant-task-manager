@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "typecheck": "tsc -b -p tsconfig.typecheck.json --noEmit",
+    "typecheck": "tsc -b tsconfig.typecheck.json --noEmit",
     "lint:check": "pnpx @biomejs/biome lint",
     "lint:write": "pnpx @biomejs/biome lint --write",
     "format:write": "pnpx @biomejs/biome format ./packages"

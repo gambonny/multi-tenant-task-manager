@@ -17,11 +17,19 @@ function RouteComponent() {
 				</h1>
 
 				<div className="mt-6 flex flex-col gap-4">
-					<ButtonLink to="/tenants/A" className="w-full">
+					<ButtonLink
+						to="/tenants/$tenantId"
+						params={{ tenantId: "A" }}
+						className="w-full"
+					>
 						Tenant A
 					</ButtonLink>
 
-					<ButtonLink to="/tenants/B" className="w-full">
+					<ButtonLink
+						to="/tenants/$tenantId"
+						params={{ tenantId: "B" }}
+						className="w-full"
+					>
 						Tenant B
 					</ButtonLink>
 				</div>
