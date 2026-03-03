@@ -1,4 +1,7 @@
 {
 	"files": [],
-	"references": [{ "path": "./packages/worker" }]
+	"references": [
+    { "path": "./packages/worker" },
+    { "path": "./packages/app" }
+  ]
 }
