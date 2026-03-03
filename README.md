@@ -35,7 +35,6 @@ This repository implements a small **multi-tenant task management system** compo
 
 * Node.js
 * pnpm
-* Neon Postgres database
 
 ---
 
