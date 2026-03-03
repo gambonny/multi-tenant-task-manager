@@ -9,8 +9,6 @@ This repository implements a small **multi-tenant task management system** compo
 * A Cloudflare Worker API (Hono + Drizzle + Neon Postgres)
 * A React frontend (TanStack Router + TanStack Query + Tailwind)
 
-The focus of this implementation is correctness, tenant isolation, clear validation, and a clean separation between backend and frontend concerns.
-
 ---
 
 # Monorepo Structure
