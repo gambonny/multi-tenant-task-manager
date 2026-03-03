@@ -11,7 +11,7 @@
 		"binding": "CF_VERSION_METADATA"
 	},
 	"vars": {
-		"ALLOWED_ORIGINS": "http://localhost:5173",
+		"ALLOWED_ORIGINS": "http://localhost:5173,https://multi-tenant-task-management.gambonny.workers.dev",
 		"LOG_LEVEL": "debug",
 		"LOG_FORMAT": "pretty"
 	}
