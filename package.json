@@ -6,7 +6,7 @@
     "typecheck": "tsc -b tsconfig.typecheck.json --noEmit",
     "lint:check": "pnpx @biomejs/biome lint",
     "lint:write": "pnpx @biomejs/biome lint --write",
-    "format:write": "pnpx @biomejs/biome format ./packages"
+    "format:write": "pnpx @biomejs/biome format ./packages --write"
   },
   "keywords": [],
   "author": "Jonny Gamba",

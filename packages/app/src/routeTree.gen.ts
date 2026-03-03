@@ -8,70 +8,70 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as TenantsTenantIdRouteImport } from './routes/tenants.$tenantId'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as TenantsTenantIdRouteImport } from "./routes/tenants.$tenantId";
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/",
+	path: "/",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const TenantsTenantIdRoute = TenantsTenantIdRouteImport.update({
-  id: '/tenants/$tenantId',
-  path: '/tenants/$tenantId',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/tenants/$tenantId",
+	path: "/tenants/$tenantId",
+	getParentRoute: () => rootRouteImport,
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/tenants/$tenantId': typeof TenantsTenantIdRoute
+	"/": typeof IndexRoute;
+	"/tenants/$tenantId": typeof TenantsTenantIdRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/tenants/$tenantId': typeof TenantsTenantIdRoute
+	"/": typeof IndexRoute;
+	"/tenants/$tenantId": typeof TenantsTenantIdRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/tenants/$tenantId': typeof TenantsTenantIdRoute
+	__root__: typeof rootRouteImport;
+	"/": typeof IndexRoute;
+	"/tenants/$tenantId": typeof TenantsTenantIdRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/tenants/$tenantId'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/tenants/$tenantId'
-  id: '__root__' | '/' | '/tenants/$tenantId'
-  fileRoutesById: FileRoutesById
+	fileRoutesByFullPath: FileRoutesByFullPath;
+	fullPaths: "/" | "/tenants/$tenantId";
+	fileRoutesByTo: FileRoutesByTo;
+	to: "/" | "/tenants/$tenantId";
+	id: "__root__" | "/" | "/tenants/$tenantId";
+	fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  TenantsTenantIdRoute: typeof TenantsTenantIdRoute
+	IndexRoute: typeof IndexRoute;
+	TenantsTenantIdRoute: typeof TenantsTenantIdRoute;
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tenants/$tenantId': {
-      id: '/tenants/$tenantId'
-      path: '/tenants/$tenantId'
-      fullPath: '/tenants/$tenantId'
-      preLoaderRoute: typeof TenantsTenantIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
+declare module "@tanstack/react-router" {
+	interface FileRoutesByPath {
+		"/": {
+			id: "/";
+			path: "/";
+			fullPath: "/";
+			preLoaderRoute: typeof IndexRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/tenants/$tenantId": {
+			id: "/tenants/$tenantId";
+			path: "/tenants/$tenantId";
+			fullPath: "/tenants/$tenantId";
+			preLoaderRoute: typeof TenantsTenantIdRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+	}
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  TenantsTenantIdRoute: TenantsTenantIdRoute,
-}
+	IndexRoute: IndexRoute,
+	TenantsTenantIdRoute: TenantsTenantIdRoute,
+};
 export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+	._addFileChildren(rootRouteChildren)
+	._addFileTypes<FileRouteTypes>();
