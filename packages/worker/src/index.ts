@@ -14,9 +14,13 @@ import {
 import { tasks } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import { logger } from "@/middleware/logger";
+import { env } from "cloudflare:workers";
+import { cors } from "hono/cors";
 
 const app = new Hono<AppEnv>();
 
+app.use(cors({ origin: env.ALLOWED_ORIGINS.split(","), credentials: true }));
+app.options("*", (c) => c.body(null, 204));
 app.use("*", logger({ appName: "TaskManager" }));
 app.use("*", authMiddleware);
 app.use("*", dbMiddleware);
