@@ -13,15 +13,24 @@ import {
 } from "@/schemas";
 import { tasks } from "@/db/schema";
 import { and, desc, eq } from "drizzle-orm";
+import { logger } from "@/middleware/logger";
 
 const app = new Hono<AppEnv>();
 
+app.use("*", logger({ appName: "TaskManager" }));
 app.use("*", authMiddleware);
 app.use("*", dbMiddleware);
 
 app.get("/health", (c) => {
-	const db = c.get("db");
+	const log = c.var.getLogger({ route: "health.handler" });
 	const auth = c.get("auth");
+
+	log.info("System operating", {
+		event: "health:ok",
+		scope: "health:handler",
+		tenantId: auth.tenantId,
+		userId: auth.userId,
+	});
 
 	return c.json({ ok: true, tenantId: auth.tenantId, userId: auth.userId });
 });
@@ -30,14 +39,35 @@ app.post(
 	"/tasks",
 	rateLimit({ limit: 10, windowMs: 60_000 }),
 	validator("json", (body, c) => {
+		const log = c.var.getLogger({ route: "tasks.create.validator" });
+
 		const { output, success, issues } = v.safeParse(CreateTaskSchema, body);
-		if (!success) return c.json({ error: "Invalid request body", issues }, 400);
+
+		if (!success) {
+			log.warn("Validation failed ", {
+				event: "tasks:create:validation:failed",
+				scope: "validator:schema",
+				issues,
+			});
+
+			return c.json({ error: "Invalid request body", issues }, 400);
+		}
+
 		return output;
 	}),
 	async (c): Promise<Response> => {
+		const log = c.var.getLogger({ route: "tasks.create.handler" });
+
 		const db = c.get("db");
 		const { tenantId, userId } = c.get("auth");
 		const { title, status } = c.req.valid("json") as CreateTask;
+
+		log.info("Saving started", {
+			event: "tasks:create:started",
+			scope: "handler:init",
+			tenantId,
+			userId,
+		});
 
 		try {
 			const inserted = await db
@@ -48,21 +78,51 @@ app.post(
 			const created = inserted[0];
 
 			if (!created) {
-				console.error("POST /tasks returned no row", { tenantId, userId });
+				log.error("Task not inserted", {
+					event: "tasks:create:db:no-row",
+					scope: "db:insert",
+					tenantId,
+					userId,
+				});
+
 				return c.json({ error: "Internal server error" }, 500);
 			}
 
+			log.info("Creation succeeded", {
+				event: "tasks:create:success",
+				scope: "db:insert",
+				tenantId,
+				userId,
+				taskId: created.id,
+			});
+
 			return c.json({ data: created }, 201);
 		} catch (err) {
-			console.error("POST /tasks failed", { tenantId, userId, error: err });
+			log.error("Creation failed", {
+				event: "tasks:create:failed",
+				scope: "db:insert",
+				tenantId,
+				userId,
+				error: err instanceof Error ? err.message : String(err),
+			});
+
 			return c.json({ error: "Internal server error" }, 500);
 		}
 	},
 );
 
 app.get("/tasks", async (c) => {
+	const log = c.var.getLogger({ route: "tasks.list.handler" });
+
 	const db = c.get("db");
-	const { tenantId } = c.get("auth");
+	const { tenantId, userId } = c.get("auth");
+
+	log.info("Preparing retrieval", {
+		event: "tasks:list:started",
+		scope: "handler:init",
+		tenantId,
+		userId,
+	});
 
 	try {
 		const rows = await db
@@ -71,11 +131,22 @@ app.get("/tasks", async (c) => {
 			.where(eq(tasks.tenantId, tenantId))
 			.orderBy(desc(tasks.createdAt));
 
+		log.info("Listing succeeded", {
+			event: "tasks:list:success",
+			scope: "db:select",
+			tenantId,
+			userId,
+			count: rows.length,
+		});
+
 		return c.json({ data: rows }, 200);
 	} catch (err) {
-		console.error("GET /tasks failed", {
+		log.error("Listing failed", {
+			event: "tasks:list:failed",
+			scope: "db:select",
 			tenantId,
-			error: err,
+			userId,
+			error: err instanceof Error ? err.message : String(err),
 		});
 
 		return c.json({ error: "Internal server error" }, 500);
@@ -85,18 +156,36 @@ app.get("/tasks", async (c) => {
 app.delete(
 	"/tasks/:id",
 	validator("param", (params, c) => {
+		const log = c.var.getLogger({ route: "tasks.delete.validator" });
+
 		const { output, success, issues } = v.safeParse(TaskIdParamsSchema, params);
 
 		if (!success) {
+			log.warn("Validation failed", {
+				event: "tasks:delete:validation:failed",
+				scope: "validator:params",
+				issues,
+			});
+
 			return c.json({ error: "Invalid request params", issues }, 400);
 		}
 
 		return output;
 	}),
 	async (c) => {
+		const log = c.var.getLogger({ route: "tasks.delete.handler" });
+
 		const db = c.get("db");
-		const { tenantId } = c.get("auth");
+		const { tenantId, userId } = c.get("auth");
 		const { id } = c.req.valid("param") as TaskIdParams;
+
+		log.info("Preparing deletion", {
+			event: "tasks:delete:started",
+			scope: "handler:init",
+			tenantId,
+			userId,
+			taskId: id,
+		});
 
 		try {
 			const deleted = await db
@@ -105,12 +194,36 @@ app.delete(
 				.returning({ id: tasks.id });
 
 			if (deleted.length === 0) {
+				log.warn("Task Not found", {
+					event: "tasks:delete:not-found",
+					scope: "db:delete",
+					tenantId,
+					userId,
+					taskId: id,
+				});
+
 				return c.json({ error: "Not found" }, 404);
 			}
 
+			log.info("Deletion succeeded", {
+				event: "tasks:delete:success",
+				scope: "db:delete",
+				tenantId,
+				userId,
+				taskId: id,
+			});
+
 			return new Response(null, { status: 204 });
 		} catch (err) {
-			console.error("DELETE /tasks/:id failed", { tenantId, id, error: err });
+			log.error("Deletion failed", {
+				event: "tasks:delete:failed",
+				scope: "db:delete",
+				tenantId,
+				userId,
+				taskId: id,
+				error: err instanceof Error ? err.message : String(err),
+			});
+
 			return c.json({ error: "Internal server error" }, 500);
 		}
 	},

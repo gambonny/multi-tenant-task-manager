@@ -58,6 +58,9 @@ importers:
 
   packages/worker:
     dependencies:
+      '@gambonny/cflo':
+        specifier: ^0.0.14
+        version: 0.0.14(hono@4.12.3)(typescript@5.9.3)
       '@gambonny/valext':
         specifier: 'catalog:'
         version: 1.0.0(valibot@1.2.0(typescript@5.9.3))
@@ -653,6 +656,14 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@gambonny/cflo@0.0.14':
+    resolution: {integrity: sha512-1VWDDjBzSVDOYHS8x7rAUz4t4T7/9XfkjG6/8urzOvfmvIB0nhfUwXjMvZWxN1hP6CheCMd0X7QJbvHAmZfebg==}
+    peerDependencies:
+      hono: ^4.7.10
+    peerDependenciesMeta:
+      hono:
+        optional: true
 
   '@gambonny/valext@1.0.0':
     resolution: {integrity: sha512-Ti3I6rdz27RyPqul53oIaykMQ7La2TOz878TK/lJRaA3EWj46TOhG4+QAF4uWxzBOWzx79zSvUY/hihfXOcABA==}
@@ -1794,6 +1805,14 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.3':
     optional: true
+
+  '@gambonny/cflo@0.0.14(hono@4.12.3)(typescript@5.9.3)':
+    dependencies:
+      valibot: 1.2.0(typescript@5.9.3)
+    optionalDependencies:
+      hono: 4.12.3
+    transitivePeerDependencies:
+      - typescript
 
   '@gambonny/valext@1.0.0(valibot@1.2.0(typescript@5.9.3))':
     dependencies:

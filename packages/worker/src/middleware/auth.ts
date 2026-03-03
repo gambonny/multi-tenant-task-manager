@@ -17,24 +17,56 @@ function unauthorized() {
 }
 
 export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
+	if (!c.var.getLogger) {
+		throw new Error("authMiddleware mis-ordered: logger middleware missing");
+	}
+
+	const log = c.var.getLogger({ route: "auth.middleware" });
+
 	const header = c.req.header("authorization");
-	if (!header) return unauthorized();
+	if (!header) {
+		log.warn("auth:missing-authorization-header", {
+			event: "auth:missing:header",
+			scope: "auth:header:retrieval",
+		});
+		return unauthorized();
+	}
 
 	const prefix = "Bearer ";
-	if (!header.startsWith(prefix)) return unauthorized();
+	if (!header.startsWith(prefix)) {
+		log.warn("auth:invalid-scheme", {
+			event: "auth:invalid:scheme",
+			scope: "auth:middleware:bearer",
+		});
+		return unauthorized();
+	}
 
 	const token = header.slice(prefix.length).trim();
-	if (!token) return unauthorized();
+	if (!token) {
+		log.warn("auth:empty-token", {
+			event: "auth:empty:token",
+			scope: "auth:middleware:token",
+		});
+		return unauthorized();
+	}
 
 	let auth: AuthContext | null = null;
 
-	if (token === c.env.TENANT_A_TOKEN)
+	if (token === c.env.TENANT_A_TOKEN) {
 		auth = { tenantId: "tenant_a", userId: "user_one" } satisfies AuthContext;
-	else if (token === c.env.TENANT_B_TOKEN)
+	} else if (token === c.env.TENANT_B_TOKEN) {
 		auth = { tenantId: "tenant_b", userId: "user_two" } satisfies AuthContext;
+	}
 
-	if (!auth) return unauthorized();
+	if (!auth) {
+		log.warn("auth:invalid-token", {
+			event: "auth:invalid:token",
+			scope: "auth:middleware:token:validation",
+		});
+		return unauthorized();
+	}
 
 	c.set("auth", auth);
+
 	return await next();
 });

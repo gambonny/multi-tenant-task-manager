@@ -29,13 +29,37 @@ export function rateLimit(opts?: {
 	const windowMs = opts?.windowMs ?? 60_000;
 
 	return createMiddleware<AppEnv>(async (c, next) => {
-		const key = opts?.key?.(c) ?? `rl:${c.get("auth").userId}`;
+		const log = c.var.getLogger({ route: "rate-limit.middleware" });
+		const auth = c.get("auth");
+
+		if (!auth) {
+			log.error("rate-limit:auth-missing", {
+				event: "rate-limit:auth:missing",
+				scope: "rate-limit:middleware:precondition",
+			});
+
+			return new Response(JSON.stringify({ error: "Internal server error" }), {
+				status: 500,
+				headers: { "content-type": "application/json" },
+			});
+		}
+
+		const key = opts?.key?.(c) ?? `rl:${auth.userId}`;
 
 		const now = Date.now();
 		const b = buckets.get(key);
 
 		if (!b || now >= b.resetAtMs) {
 			buckets.set(key, { count: 1, resetAtMs: now + windowMs });
+
+			log.debug("rate-limit:window:reset", {
+				event: "rate-limit:window:reset",
+				scope: "rate-limit:fixed-window",
+				limit,
+				windowMs,
+				key,
+			});
+
 			return next();
 		}
 
@@ -44,10 +68,31 @@ export function rateLimit(opts?: {
 				1,
 				Math.ceil((b.resetAtMs - now) / 1000),
 			);
+
+			log.warn("rate-limit:blocked", {
+				event: "rate-limit:blocked",
+				scope: "rate-limit:fixed-window",
+				limit,
+				windowMs,
+				key,
+				count: b.count,
+				retryAfterSeconds,
+			});
+
 			return tooManyRequests(retryAfterSeconds);
 		}
 
 		b.count += 1;
+
+		log.debug("rate-limit:allowed", {
+			event: "rate-limit:allowed",
+			scope: "rate-limit:fixed-window",
+			limit,
+			windowMs,
+			key,
+			count: b.count,
+		});
+
 		return next();
 	});
 }
