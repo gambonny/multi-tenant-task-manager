@@ -1,10 +1,8 @@
 import {
 	createFileRoute,
 	type ErrorComponentProps,
-	notFound,
 } from "@tanstack/react-router";
 import React from "react";
-import { ApiError } from "@/api/client";
 import { ButtonLink } from "@/components/ButtonLink";
 import { CenteredCard } from "@/components/CenteredCard";
 import { NewTaskForm } from "@/components/NewTaskForm";
@@ -12,52 +10,7 @@ import { TaskList } from "@/components/TaskList";
 import { TenantPending } from "@/components/TenantPending";
 import { tasksListOptions } from "@/queries/tasks";
 import type { Tenant } from "@/types";
-
-function resolveTenant(tenantIdRaw: string): Tenant {
-	if (tenantIdRaw === "A") {
-		const token = import.meta.env.VITE_TENANT_A_TOKEN as string | undefined;
-		if (!token) throw new Error("Missing env var: VITE_TENANT_A_TOKEN");
-
-		return {
-			id: "A",
-			name: "Tenant A",
-			userId: "user_one",
-			token,
-		} satisfies Tenant;
-	}
-
-	if (tenantIdRaw === "B") {
-		const token = import.meta.env.VITE_TENANT_B_TOKEN as string | undefined;
-		if (!token) throw new Error("Missing env var: VITE_TENANT_B_TOKEN");
-
-		return {
-			id: "B",
-			name: "Tenant B",
-			userId: "user_two",
-			token,
-		} satisfies Tenant;
-	}
-
-	throw notFound({
-		data: {
-			message: `Tenant "${tenantIdRaw}" does not exist.`,
-			validTenants: ["A", "B"],
-		},
-	});
-}
-
-function getTenantErrorMessage(error: unknown) {
-	if (error instanceof ApiError) {
-		if (error.status === 401) return "Unauthorized. Check the tenant token.";
-		if (error.status === 429)
-			return "Too many requests. Try again in a moment.";
-		return error.message || "Request failed.";
-	}
-
-	if (error instanceof Error) return error.message;
-
-	return "Something went wrong.";
-}
+import { getTenantErrorMessage, resolveTenant } from "@/utils";
 
 export const Route = createFileRoute("/tenants/$tenantId")({
 	head: () => ({

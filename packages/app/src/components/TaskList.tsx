@@ -1,25 +1,6 @@
-import { ApiError } from "@/api/client";
 import { useDeleteTaskMutation, useTasksSuspenseQuery } from "@/queries/tasks";
 import type { Tenant } from "@/types";
-
-function getErrorMessage(err: unknown): string {
-	if (!err) return "Something went wrong.";
-
-	if (err instanceof ApiError) {
-		if (err.status === 401) return "Unauthorized. Check the tenant token.";
-		return err.message || "Request failed.";
-	}
-
-	if (err instanceof Error) return err.message;
-
-	return "Something went wrong.";
-}
-
-function formatCreatedAt(createdAt: string) {
-	const d = new Date(createdAt);
-	if (Number.isNaN(d.getTime())) return createdAt;
-	return d.toLocaleString();
-}
+import { formatToLocalString, getTenantErrorMessage } from "@/utils";
 
 export function TaskList({ tenant }: { tenant: Tenant }) {
 	const { data: tasks } = useTasksSuspenseQuery(tenant);
@@ -59,7 +40,7 @@ export function TaskList({ tenant }: { tenant: Tenant }) {
 												{t.status}
 											</span>
 											<span className="text-slate-500">
-												{formatCreatedAt(t.createdAt)}
+												{formatToLocalString(t.createdAt)}
 											</span>
 										</div>
 									</div>
@@ -82,7 +63,7 @@ export function TaskList({ tenant }: { tenant: Tenant }) {
 
 								{del.isError && !del.isPending ? (
 									<p role="alert" className="mt-2 text-sm text-red-600">
-										{getErrorMessage(del.error)}
+										{getTenantErrorMessage(del.error)}
 									</p>
 								) : null}
 							</li>

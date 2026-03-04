@@ -1,23 +1,9 @@
 import * as React from "react";
-import { ApiError } from "@/api/client";
 import { useCreateTaskMutation } from "@/queries/tasks";
 import type { Tenant } from "@/types";
+import { getTenantErrorMessage } from "@/utils";
 
 const errorId = "new-task-error";
-
-function getCreateTaskErrorMessage(err: unknown): string | null {
-	if (!err) return null;
-
-	if (err instanceof ApiError) {
-		if (err.status === 401) return "Unauthorized. Check the tenant token.";
-		if (err.status === 429) return "Too many requests. Try again in a moment.";
-		return err.message || "Request failed.";
-	}
-
-	if (err instanceof Error) return err.message;
-
-	return "Something went wrong.";
-}
 
 export function NewTaskForm({ tenant }: { tenant: Tenant }) {
 	const [title, setTitle] = React.useState("");
@@ -26,7 +12,9 @@ export function NewTaskForm({ tenant }: { tenant: Tenant }) {
 	const trimmed = title.trim();
 	const isDisabled = trimmed.length === 0 || createTask.isPending;
 
-	const errorMessage = getCreateTaskErrorMessage(createTask.error);
+	const errorMessage = createTask.error
+		? getTenantErrorMessage(createTask.error)
+		: null;
 
 	function onChange(e: React.ChangeEvent<HTMLInputElement>) {
 		setTitle(e.target.value);
